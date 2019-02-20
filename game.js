@@ -19,51 +19,46 @@ class Vector {
 }
 
 class Actor {
-  constructor() {
-
+  constructor(pos = new Vector(0, 0), size = new Vector(1, 1), speed = new Vector(0, 0)) {
+    if(pos instanceof Vector && size instanceof Vector && speed instanceof Vector) {
+      this.pos = pos;
+      this.size = size;
+      this.speed = speed;
+    } else {
+      throw new Error('В качестве аргумента передан не объект типа Vector!!!');
+    }
   }
+
+  act() {}
+
+  get left() {return this.pos.x}
+  get top() {return this.pos.y;}
+  get right() {return this.pos.x + this.size.x}
+  get bottom() {return this.pos.y + this.size.y}
+  get type() {return 'actor'}
+
+  isIntersect(actor) {
+		if (!(actor instanceof Actor) || !actor) {
+			throw new Error('Принимает один аргумент — движущийся объект типа Actor!!!');
+		}
+
+		if (actor === this) {
+			return false;
+		}
+
+		return this.left < actor.right && this.right > actor.left && this.top < actor.bottom && this.bottom > actor.top;
+	}
+
 }
 
 class Level {
-  constructor() {
-
+  constructor(grid = [], actorsArray = []) {
+    this.grid = grid;
+    this.actors = actorsArray;
+    this.height = grid.length;
+    this.width = grid.reduce((acc, el) => el.length > acc ? el.length : acc, 0);
+    this.finishDelay = 1;
+    this.player = actorsArray.find(el => el.type === 'player');
+    this.status = null;
   }
 }
-
-
-const grid = [
-  new Array(3),
-  ['wall', 'wall', 'lava']
-];
-const level = new Level(grid);
-runLevel(level, DOMDisplay);
-
-const schemas = [
-  [
-    '         ',
-    '         ',
-    '    =    ',
-    '       o ',
-    '     !xxx',
-    ' @       ',
-    'xxx!     ',
-    '         '
-  ],
-  [
-    '      v  ',
-    '    v    ',
-    '  v      ',
-    '        o',
-    '        x',
-    '@   x    ',
-    'x        ',
-    '         '
-  ]
-];
-const actorDict = {
-  '@': Player,
-  'v': FireRain
-}
-const parser = new LevelParser(actorDict);
-runGame(schemas, parser, DOMDisplay)
-  .then(() => console.log('Вы выиграли приз!'));
