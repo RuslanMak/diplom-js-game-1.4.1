@@ -7,10 +7,10 @@ class Vector {
     }
 
     plus(vector) {
-        if (vector instanceof Vector) {
-            return new Vector(this.x + vector.x, this.y + vector.y);
+        if (!(vector instanceof Vector)) {
+            throw new Error('Можно прибавлять к вектору только вектор типа Vector');
         }
-        throw new Error('Можно прибавлять к вектору только вектор типа Vector');
+        return new Vector(this.x + vector.x, this.y + vector.y);
     }
 
     times(n = 1) {
@@ -20,12 +20,12 @@ class Vector {
 
 class Actor {
     constructor(pos = new Vector(0, 0), size = new Vector(1, 1), speed = new Vector(0, 0)) {
-        if (pos instanceof Vector && size instanceof Vector && speed instanceof Vector) {
+        if (!(pos instanceof Vector && size instanceof Vector && speed instanceof Vector)) {
+            throw new Error('В качестве аргумента передан не объект типа Vector!!!');
+        } else {
             this.pos = pos;
             this.size = size;
             this.speed = speed;
-        } else {
-            throw new Error('В качестве аргумента передан не объект типа Vector!!!');
         }
     }
 
@@ -63,20 +63,22 @@ class Actor {
 
 class Level {
     constructor(grid = [], actorsArray = []) {
+        if (!Array.isArray(actorsArray)) actorsArray = [];
         this.grid = grid;
         this.actors = actorsArray;
         this.height = grid.length;
         this.width = grid.reduce((acc, el) => el.length > acc ? el.length : acc, 0);
         this.finishDelay = 1;
-        this.player = actorsArray.find(el => el.type === 'player');
+        this._player = actorsArray.find(el => el.type === 'player');
         this.status = null;
     }
 
+    get player() {
+      return this._player;
+    }
+
     isFinished() {
-        if (this.status != null && this.finishDelay < 0) {
-            return true;
-        }
-        return false;
+        return (this.status != null && this.finishDelay < 0);
     }
 
     actorAt(actor) {
@@ -110,31 +112,29 @@ class Level {
     }
 
     removeActor(actor) {
-        this.actors = this.actors.filter(item => item !== actor);
+        let actorIndex = this.actors.findIndex(item => item === actor);
+
+        if(actorIndex !== -1) {
+          this.actors.splice(actorIndex, 1);
+        }
     }
 
     noMoreActors(type) {
-        if (this.actors) {
-            for (let actor of this.actors) {
-                if (actor.type === type) {
-                    return false;
-                }
-            }
-        }
-        return true;
+        return !this.actors.some(el => el.type === type);
     }
 
     playerTouched(type, actor) {
-        if (this.status === null) {
-            if (type === 'lava' || type === 'fireball') {
-                this.status = 'lost';
-                return this.status;
-            }
-            if (type === 'coin') {
-                this.removeActor(actor);
-                if (this.noMoreActors('coin')) {
-                    this.status = 'won';
-                }
+        if (this.status !== null) return;
+
+        if (type === 'lava' || type === 'fireball') {
+            this.status = 'lost';
+            return this.status;
+        }
+
+        if (type === 'coin') {
+            this.removeActor(actor);
+            if (this.noMoreActors('coin')) {
+                this.status = 'won';
             }
         }
     }
@@ -161,7 +161,6 @@ class LevelParser {
         if (symbol === '!') {
             return 'lava'
         }
-        return undefined;
     }
 
     createGrid(arrStrin) {
@@ -222,26 +221,23 @@ class Fireball extends Actor {
 }
 
 class HorizontalFireball extends Fireball {
-    constructor(pos) {
-        super(pos);
-        this.speed = new Vector(2, 0);
-        this.size = new Vector(1, 1);
+    constructor(pos, speed = new Vector(2, 0)) {
+        super(pos, speed);
+        this.size;
     }
 }
 
 class VerticalFireball extends Fireball {
-    constructor(pos) {
-        super(pos);
-        this.speed = new Vector(0, 2);
-        this.size = new Vector(1, 1);
+    constructor(pos, speed = new Vector(0, 2)) {
+        super(pos, speed);
+        this.size;
     }
 }
 
 class FireRain extends Fireball {
-    constructor(pos) {
-        super(pos);
-        this.speed = new Vector(0, 3);
-        this.size = new Vector(1, 1);
+    constructor(pos, speed = new Vector(0, 3)) {
+        super(pos, speed);
+        this.size;
         this.currentPos = pos;
     }
 
