@@ -22,11 +22,11 @@ class Actor {
     constructor(pos = new Vector(0, 0), size = new Vector(1, 1), speed = new Vector(0, 0)) {
         if (!(pos instanceof Vector && size instanceof Vector && speed instanceof Vector)) {
             throw new Error('В качестве аргумента передан не объект типа Vector!!!');
-        } else {
-            this.pos = pos;
-            this.size = size;
-            this.speed = speed;
         }
+
+        this.pos = pos;
+        this.size = size;
+        this.speed = speed;
     }
 
     act() {}
@@ -223,21 +223,21 @@ class Fireball extends Actor {
 class HorizontalFireball extends Fireball {
     constructor(pos, speed = new Vector(2, 0)) {
         super(pos, speed);
-        this.size;
+        // this.size;
     }
 }
 
 class VerticalFireball extends Fireball {
     constructor(pos, speed = new Vector(0, 2)) {
         super(pos, speed);
-        this.size;
+        // this.size;
     }
 }
 
 class FireRain extends Fireball {
     constructor(pos, speed = new Vector(0, 3)) {
         super(pos, speed);
-        this.size;
+        // this.size;
         this.currentPos = pos;
     }
 
